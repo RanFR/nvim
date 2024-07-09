@@ -4,9 +4,6 @@
 
 local opt = vim.opt
 
--- font
-opt.guifont = { "Cascadia Code NF", "HarmonyOS Sans SC" }
-
 -- line number
 opt.relativenumber = true
 opt.number = true
