@@ -12,4 +12,7 @@ return {
 
 	-- editor
 	{ "nvim-neo-tree/neo-tree.nvim", enabled = true },
+
+	-- LSP
+	{ "neovim/nvim-lspconfig", enabled = true },
 }
