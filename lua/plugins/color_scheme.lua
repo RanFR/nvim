@@ -1,7 +1,7 @@
 return {
-    -- configure LazyVim to load gruvbox
-    "LazyVim/LazyVim",
-    opts = {
-        colorscheme = "gruvbox",
-    },
+	-- configure LazyVim to load tokyonight
+	"folke/tokyonight.nvim",
+	opts = {
+		style = "moon",
+	},
 }
