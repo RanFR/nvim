@@ -250,4 +250,7 @@ return {
 			end)
 		end
 	end,
+
+	"mason.nvim",
+	{ "williamboman/mason-lspconfig.nvim", config = function() end },
 }
