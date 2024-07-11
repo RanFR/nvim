@@ -17,4 +17,7 @@ return {
 	{ "neovim/nvim-lspconfig", enabled = true },
 	{ "williamboman/mason.nvim", enabled = true },
 	{ "williamboman/mason-lspconfig.nvim", enabled = true },
+
+	-- TreeSitter
+	{ "nvim-treesitter/nvim-treesitter", enabled = true },
 }
