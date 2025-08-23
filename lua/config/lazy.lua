@@ -41,5 +41,3 @@ require("lazy").setup({
     -- 自动检查插件升级
     checker = { enabled = true },
 })
-
-
