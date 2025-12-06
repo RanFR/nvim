@@ -29,6 +29,7 @@ require("config.basic")
 
 -- 设置 leader 按键
 vim.g.mapleader = " " -- 设置 <leader> 键为空格
+vim.g.maplocalleader = "\\" -- 设置 <localleader> 键为反斜杠
 
 -- 设置 lazy.nvim
 require("lazy").setup({
@@ -37,7 +38,7 @@ require("lazy").setup({
         { import = "plugins" }
     },
     -- 安装插件时的配色方案
-    install = { colorscheme = { "tokyonight" } },
+    install = { colorscheme = { "habamax" } },
     -- 自动检查插件升级
     checker = { enabled = true },
 })
