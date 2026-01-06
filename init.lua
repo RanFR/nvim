@@ -349,6 +349,7 @@ vim.api.nvim_create_autocmd("FileType", {
     "checkhealth",
     "help",
     "lspinfo",
+    "nvim-pack",
     "qf",
   },
   callback = function(event)
