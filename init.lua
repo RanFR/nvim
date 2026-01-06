@@ -18,7 +18,7 @@ vim.o.relativenumber = true
 vim.o.mouse = "a"
 
 -- disable mode show
-vim.o.showmode = true
+vim.o.showmode = false
 
 -- clipboard
 vim.o.clipboard = vim.env.SSH_CONNECTION and "" or "unnamedplus"
@@ -235,7 +235,7 @@ vim.keymap.set("n", "<Leader>cd", vim.lsp.buf.definition, { desc = "Definition" 
 vim.keymap.set("n", "<Leader>cr", vim.lsp.buf.references, { desc = "References" })
 vim.keymap.set("n", "<Leader>ci", vim.lsp.buf.implementation, { desc = "Implementation" })
 vim.keymap.set("n", "<Leader>ct", vim.lsp.buf.type_definition, { desc = "Type Definition" })
-vim.keymap.set("n", "<Leader>ch", vim.lsp.buf.signature_help, { desc = "Dignature Help" })
+vim.keymap.set("n", "<Leader>ch", vim.lsp.buf.signature_help, { desc = "Signature Help" })
 
 -- enable LSP servers
 vim.lsp.enable({
@@ -271,7 +271,7 @@ require("conform").setup({
     python = { "ruff_format" },
     yaml = { "prettier" },
   },
-  foramt_on_save = {
+  format_on_save = {
     timeout_ms = 500,
     lsp_format = "fallback",
   },
