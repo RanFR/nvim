@@ -34,10 +34,10 @@ vim.o.ignorecase = true
 vim.o.smartcase = true
 
 -- update time
-vim.o.updatetime = 3000
+vim.o.updatetime = 300
 
 -- mapped sequence wait time
-vim.o.timeoutlen = 1500
+vim.o.timeoutlen = 250
 
 -- configure how new splits should be opened
 vim.o.splitright = true
