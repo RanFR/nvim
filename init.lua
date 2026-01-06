@@ -34,10 +34,10 @@ vim.o.ignorecase = true
 vim.o.smartcase = true
 
 -- update time
-vim.o.updatetime = 500
+vim.o.updatetime = 3000
 
 -- mapped sequence wait time
-vim.o.timeoutlen = 500
+vim.o.timeoutlen = 1500
 
 -- configure how new splits should be opened
 vim.o.splitright = true
@@ -74,6 +74,16 @@ vim.opt.completeopt = { "menu", "menuone", "noselect" }
 -- create self group
 local function augroup(name)
   return vim.api.nvim_create_augroup("self_" .. name, { clear = true })
+end
+
+-- safe load plugin with pcall protection
+local function safe_load(plugin_name)
+  local ok, err = pcall(require, plugin_name)
+  if not ok then
+    vim.notify("Failed to load " .. plugin_name .. ": " .. tostring(err), vim.log.levels.WARN)
+    return nil
+  end
+  return err
 end
 
 -- function to cleanup unused plugins
@@ -154,23 +164,38 @@ vim.cmd.colorscheme("catppuccin-mocha")
 -- vim.cmd.colorscheme("gruvbox")
 
 -- setup status line
-require("lualine").setup()
+local lualine = safe_load("lualine")
+if lualine then
+  lualine.setup()
+end
 
 -- setup notify
-require("mini.notify").setup()
+local mini_notify = safe_load("mini.notify")
+if mini_notify then
+  mini_notify.setup()
+end
 
 -- configure Mason to manage LSP/DAP/Formatter
-require("mason").setup()
+local mason = safe_load("mason")
+if mason then
+  mason.setup()
+end
 
 -- configure Telescope
-require("telescope").setup()
+local telescope = safe_load("telescope")
+if telescope then
+  telescope.setup()
+end
 
 -- configure mini.comment to set comment keymap
-require("mini.comment").setup({
-  mappings = {
-    comment_line = "<Leader>cc",
-  },
-})
+local mini_comment = safe_load("mini.comment")
+if mini_comment then
+  mini_comment.setup({
+    mappings = {
+      comment_line = "<Leader>cc",
+    },
+  })
+end
 
 -- ============================================================================
 -- 5. Tree-sitter Configuration
@@ -192,7 +217,15 @@ local install_languages = {
   "xml",
   "yaml",
 }
-require("nvim-treesitter").install(install_languages)
+
+-- install Tree-sitter parsers with pcall protection
+local treesitter = safe_load("nvim-treesitter")
+if treesitter then
+  local ok, err = pcall(treesitter.install, install_languages)
+  if not ok then
+    vim.notify("Failed to install Tree-sitter parsers: " .. tostring(err), vim.log.levels.WARN)
+  end
+end
 
 -- define Tree-sitter highlight (FileType)
 local highlight_languages = {
@@ -261,28 +294,31 @@ vim.lsp.config("lua_ls", {
 -- ============================================================================
 
 -- auto format by conform
-require("conform").setup({
-  formatters_by_ft = {
-    bash = { "shfmt" },
-    c = { "clang-format" },
-    cpp = { "clang-format" },
-    json = { "prettier" },
-    lua = { "stylua" },
-    python = { "ruff_format" },
-    yaml = { "prettier" },
-  },
-  format_on_save = {
-    timeout_ms = 500,
-    lsp_format = "fallback",
-  },
-})
-vim.api.nvim_create_autocmd("BufWritePre", {
-  group = augroup("format_on_save"),
-  pattern = { "*.sh", "*.bash", "*.c", "*.cpp", "*.cc", "*.h", "*.hpp", "*.lua", "*.py", "*.yml", "*.yaml" },
-  callback = function(args)
-    require("conform").format({ bufnr = args.buf })
-  end,
-})
+local conform = safe_load("conform")
+if conform then
+  conform.setup({
+    formatters_by_ft = {
+      bash = { "shfmt" },
+      c = { "clang-format" },
+      cpp = { "clang-format" },
+      json = { "prettier" },
+      lua = { "stylua" },
+      python = { "ruff_format" },
+      yaml = { "prettier" },
+    },
+    format_on_save = {
+      timeout_ms = 500,
+      lsp_format = "fallback",
+    },
+  })
+  vim.api.nvim_create_autocmd("BufWritePre", {
+    group = augroup("format_on_save"),
+    pattern = { "*.sh", "*.bash", "*.c", "*.cpp", "*.cc", "*.h", "*.hpp", "*.lua", "*.py", "*.yml", "*.yaml" },
+    callback = function(args)
+      conform.format({ bufnr = args.buf })
+    end,
+  })
+end
 
 -- ============================================================================
 -- 8. Autocommands
@@ -334,7 +370,7 @@ vim.api.nvim_create_autocmd("FileType", {
 -- ============================================================================
 
 local map = vim.keymap.set
-local telescope_builtin = require("telescope.builtin")
+local telescope_builtin = safe_load("telescope.builtin")
 
 -- better up/down
 map({ "n", "x" }, "j", "v:count == 0 ? 'gj' : 'j'", { desc = "Down", expr = true, silent = true })
@@ -374,9 +410,11 @@ map("n", "<Leader>uh", "<Cmd>nohlsearch<CR>", { desc = "Clean Highlight" })
 map({ "i", "x", "n", "s" }, "<C-s>", "<Cmd>w<CR><Esc>")
 
 -- find files by telescope
-map("n", "<Leader>ff", telescope_builtin.find_files)
-map("n", "<Leader>fs", telescope_builtin.grep_string)
-map("n", "<Leader>fg", telescope_builtin.live_grep)
+if telescope_builtin then
+  map("n", "<Leader>ff", telescope_builtin.find_files, { desc = "Find Files" })
+  map("n", "<Leader>fs", telescope_builtin.grep_string, { desc = "Grep String" })
+  map("n", "<Leader>fg", telescope_builtin.live_grep, { desc = "Live Grep" })
+end
 
 -- quick press jk as <Esc>
 map("i", "jk", "<Esc>")
