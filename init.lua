@@ -106,7 +106,7 @@ local function pack_clean()
     return
   end
 
-  local choice = vim.fn.confirm("Remove unused plugins?\n\n" .. table.concat(unused_plugins, "\n\n"), "&Yes\n&No", 2)
+  local choice = vim.fn.confirm("Remove unused plugins?\n" .. table.concat(unused_plugins, "\n\n"), "&Yes\n&No", 2)
   if choice == 1 then
     vim.pack.del(unused_plugins)
   end
@@ -127,7 +127,7 @@ local function pack_update()
     return
   end
 
-  local choice = vim.fn.confirm("Update plugins?\n\n" .. table.concat(active_plugins, "\n"), "&Yes\n&No", 2)
+  local choice = vim.fn.confirm("Update plugins?\n" .. table.concat(active_plugins, "\n"), "&Yes\n&No", 2)
 
   if choice == 1 then
     vim.pack.update(active_plugins)
@@ -276,7 +276,7 @@ vim.lsp.enable({
   "clangd",
   "jsonls",
   "lua_ls",
-  "ruff",
+  "pyright",
   "yamlls",
 })
 vim.lsp.config("lua_ls", {
@@ -420,7 +420,8 @@ end
 map("i", "jk", "<Esc>")
 
 -- write file
-map({ "n", "i" }, "<Leader>w", "<Esc><Cmd>write<CR>")
+map({ "n", "i" }, "<Leader>w", "<Esc><Cmd>write<CR>", { desc = "Write" })
+map("n", "<Leader>q", "<Cmd>quit<CR>", { desc = "Quit" })
 
 -- open Explore
-map("n", "<Leader>e", "<Cmd>Explore<CR>")
+map("n", "<Leader>e", "<Cmd>Explore<CR>", { desc = "Open Explore" })
