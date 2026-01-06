@@ -1,19 +1,388 @@
--- Load core configuration modules
-require 'config.globals'
-require 'config.options'
-require 'config.keymaps'
-require 'config.autocmds'
+-- ============================================================================
+-- 1. Basic Settings
+-- ============================================================================
 
--- Load plugins
--- Color scheme
-require 'plugins.colorscheme'
--- File searcher
-require 'plugins.fileseacher'
--- Explorer
-require 'plugins.explorer'
--- Mini
-require 'plugins.mini'
--- Formatter
-require 'plugins.formatter'
--- LSP
-require 'plugins.lsp'
+-- leader key
+vim.g.mapleader = " "
+vim.g.maplocalleader = "\\"
+
+-- netrw
+vim.g.netrw_liststyle = 0 -- thin/long/wide/tree
+vim.g.netrw_banner = 0 -- do not display banner
+
+-- line number
+vim.o.number = true
+vim.o.relativenumber = true
+
+-- enable mouse mode
+vim.o.mouse = "a"
+
+-- disable mode show
+vim.o.showmode = true
+
+-- clipboard
+vim.o.clipboard = vim.env.SSH_CONNECTION and "" or "unnamedplus"
+
+-- enable break indent
+vim.o.breakindent = true
+
+-- save undo history
+vim.o.undofile = true
+
+-- case-insenstive searching
+vim.o.ignorecase = true
+vim.o.smartcase = true
+
+-- update time
+vim.o.updatetime = 500
+
+-- mapped sequence wait time
+vim.o.timeoutlen = 500
+
+-- configure how new splits should be opened
+vim.o.splitright = true
+vim.o.splitbelow = true
+
+-- enable listchars
+vim.o.list = true
+vim.opt.listchars = { tab = "» ", trail = "·", nbsp = "␣" }
+
+-- show current cursor line
+vim.o.cursorline = true
+
+-- minimal number of screen lines to keep above/below/left/right
+vim.o.scrolloff = 10
+vim.o.sidescrolloff = 8
+
+-- confirm if not saved a file
+vim.o.confirm = true
+
+-- wrap
+vim.o.wrap = true
+
+-- tab indent
+vim.o.tabstop = 2
+vim.o.softtabstop = 2
+
+-- tab complete
+vim.opt.completeopt = { "menu", "menuone", "noselect" }
+
+-- ============================================================================
+-- 2. Helper Functions
+-- ============================================================================
+
+-- create self group
+local function augroup(name)
+  return vim.api.nvim_create_augroup("self_" .. name, { clear = true })
+end
+
+-- function to cleanup unused plugins
+local function pack_clean()
+  local active_plugins = {}
+  local unused_plugins = {}
+
+  for _, plugin in ipairs(vim.pack.get()) do
+    active_plugins[plugin.spec.name] = plugin.active
+  end
+
+  for _, plugin in ipairs(vim.pack.get()) do
+    if not active_plugins[plugin.spec.name] then
+      table.insert(unused_plugins, plugin.spec.name)
+    end
+  end
+
+  if #unused_plugins == 0 then
+    print("No unused plugins.")
+    return
+  end
+
+  local choice = vim.fn.confirm("Remove unused plugins?\n\n" .. table.concat(unused_plugins, "\n\n"), "&Yes\n&No", 2)
+  if choice == 1 then
+    vim.pack.del(unused_plugins)
+  end
+end
+
+-- function to update plugins
+local function pack_update()
+  local active_plugins = {}
+
+  for _, plugin in ipairs(vim.pack.get()) do
+    if plugin.active then
+      table.insert(active_plugins, plugin.spec.name)
+    end
+  end
+
+  if #active_plugins == 0 then
+    print("No active plugins to update.")
+    return
+  end
+
+  local choice = vim.fn.confirm("Update plugins?\n\n" .. table.concat(active_plugins, "\n"), "&Yes\n&No", 2)
+
+  if choice == 1 then
+    vim.pack.update(active_plugins)
+    print("Plugins updated!")
+  else
+    print("Update cancelled.")
+  end
+end
+
+-- ============================================================================
+-- 3. Plugin Management
+-- ============================================================================
+
+-- add plugins
+vim.pack.add({
+  { src = "https://github.com/catppuccin/nvim", name = "catppuccin.nvim" },
+  { src = "https://github.com/nvim-lua/plenary.nvim" },
+  { src = "https://github.com/nvim-telescope/telescope.nvim" },
+  { src = "https://github.com/mason-org/mason.nvim" },
+  { src = "https://github.com/neovim/nvim-lspconfig" },
+  { src = "https://github.com/nvim-treesitter/nvim-treesitter" },
+  { src = "https://github.com/stevearc/conform.nvim" },
+  { src = "https://github.com/nvim-lualine/lualine.nvim" },
+  { src = "https://github.com/nvim-tree/nvim-web-devicons" },
+  { src = "https://github.com/nvim-mini/mini.nvim" },
+})
+
+-- ============================================================================
+-- 4. Plugin Configuration
+-- ============================================================================
+
+-- set colorscheme
+vim.cmd.colorscheme("catppuccin-mocha")
+-- vim.cmd.colorscheme("gruvbox")
+
+-- setup status line
+require("lualine").setup()
+
+-- setup notify
+require("mini.notify").setup()
+
+-- configure Mason to manage LSP/DAP/Formatter
+require("mason").setup()
+
+-- configure Telescope
+require("telescope").setup()
+
+-- configure mini.comment to set comment keymap
+require("mini.comment").setup({
+  mappings = {
+    comment_line = "<Leader>cc",
+  },
+})
+
+-- ============================================================================
+-- 5. Tree-sitter Configuration
+-- ============================================================================
+
+-- define Tree-sitter parsers to install
+local install_languages = {
+  "bash",
+  "c",
+  "cpp",
+  "json",
+  "jsonc",
+  "lua",
+  "markdown",
+  "markdown_inline",
+  "python",
+  "toml",
+  "vim",
+  "xml",
+  "yaml",
+}
+require("nvim-treesitter").install(install_languages)
+
+-- define Tree-sitter highlight (FileType)
+local highlight_languages = {
+  "bash",
+  "c",
+  "cpp",
+  "lua",
+  "markdown",
+  "python",
+  "sh",
+}
+-- create auto highlight based on tree-sitter
+vim.api.nvim_create_autocmd("FileType", {
+  pattern = highlight_languages,
+  callback = function(args)
+    vim.treesitter.start(args.buf)
+  end,
+})
+
+-- ============================================================================
+-- 6. LSP Configuration
+-- ============================================================================
+
+-- create autocmd of LSP
+vim.api.nvim_create_autocmd("LspAttach", {
+  group = augroup("lsp"),
+  callback = function(args)
+    local client = vim.lsp.get_client_by_id(args.data.client_id)
+    if client and client:supports_method("textDocument/completion") then
+      vim.lsp.completion.enable(true, client.id, args.buf, {
+        autotrigger = true,
+      })
+    end
+  end,
+})
+
+-- configure custom LSP keymaps
+vim.keymap.set({ "n", "i" }, "<Leader>ca", vim.lsp.buf.code_action, { desc = "Action" })
+vim.keymap.set("n", "<Leader>cd", vim.lsp.buf.definition, { desc = "Definition" })
+vim.keymap.set("n", "<Leader>cr", vim.lsp.buf.references, { desc = "References" })
+vim.keymap.set("n", "<Leader>ci", vim.lsp.buf.implementation, { desc = "Implementation" })
+vim.keymap.set("n", "<Leader>ct", vim.lsp.buf.type_definition, { desc = "Type Definition" })
+vim.keymap.set("n", "<Leader>ch", vim.lsp.buf.signature_help, { desc = "Dignature Help" })
+
+-- enable LSP servers
+vim.lsp.enable({
+  "bashls",
+  "clangd",
+  "jsonls",
+  "lua_ls",
+  "ruff",
+  "yamlls",
+})
+vim.lsp.config("lua_ls", {
+  settings = {
+    Lua = {
+      diagnostics = {
+        globals = { "vim" }, -- set vim as global variable
+      },
+    },
+  },
+})
+
+-- ============================================================================
+-- 7. Auto Format Configuration
+-- ============================================================================
+
+-- auto format by conform
+require("conform").setup({
+  formatters_by_ft = {
+    bash = { "shfmt" },
+    c = { "clang-format" },
+    cpp = { "clang-format" },
+    json = { "prettier" },
+    lua = { "stylua" },
+    python = { "ruff_format" },
+    yaml = { "prettier" },
+  },
+  foramt_on_save = {
+    timeout_ms = 500,
+    lsp_format = "fallback",
+  },
+})
+vim.api.nvim_create_autocmd("BufWritePre", {
+  group = augroup("format_on_save"),
+  pattern = { "*.sh", "*.bash", "*.c", "*.cpp", "*.cc", "*.h", "*.hpp", "*.lua", "*.py", "*.yml", "*.yaml" },
+  callback = function(args)
+    require("conform").format({ bufnr = args.buf })
+  end,
+})
+
+-- ============================================================================
+-- 8. Autocommands
+-- ============================================================================
+
+-- check if we need to reload the file when it changed
+vim.api.nvim_create_autocmd({ "FocusGained", "TermClose", "TermLeave" }, {
+  group = augroup("checktime"),
+  callback = function()
+    if vim.o.buftype ~= "nofile" then
+      vim.cmd("checktime")
+    end
+  end,
+})
+
+-- highlight on yank
+vim.api.nvim_create_autocmd("TextYankPost", {
+  group = augroup("highlight_yank"),
+  callback = function()
+    (vim.hl or vim.highlight).on_yank()
+  end,
+})
+
+-- close some filetypes with <q>
+vim.api.nvim_create_autocmd("FileType", {
+  group = augroup("close_with_q"),
+  pattern = {
+    "checkhealth",
+    "help",
+    "lspinfo",
+    "qf",
+  },
+  callback = function(event)
+    vim.bo[event.buf].buflisted = false
+    vim.schedule(function()
+      vim.keymap.set("n", "q", function()
+        vim.cmd("close")
+        pcall(vim.api.nvim_buf_delete, event.buf, { force = true })
+      end, {
+        buffer = event.buf,
+        silent = true,
+      })
+    end)
+  end,
+})
+
+-- ============================================================================
+-- 9. Keymaps
+-- ============================================================================
+
+local map = vim.keymap.set
+local telescope_builtin = require("telescope.builtin")
+
+-- better up/down
+map({ "n", "x" }, "j", "v:count == 0 ? 'gj' : 'j'", { desc = "Down", expr = true, silent = true })
+map({ "n", "x" }, "<Down>", "v:count == 0 ? 'gj' : 'j'", { desc = "Down", expr = true, silent = true })
+map({ "n", "x" }, "k", "v:count == 0 ? 'gk' : 'k'", { desc = "Up", expr = true, silent = true })
+map({ "n", "x" }, "<Up>", "v:count == 0 ? 'gk' : 'k'", { desc = "Up", expr = true, silent = true })
+
+-- move to window using the <Ctrl> hjkl keys
+map("n", "<C-h>", "<C-w>h", { desc = "Go to Left Window", remap = true })
+map("n", "<C-j>", "<C-w>j", { desc = "Go to Lower Window", remap = true })
+map("n", "<C-k>", "<C-w>k", { desc = "Go to Upper Window", remap = true })
+map("n", "<C-l>", "<C-w>l", { desc = "Go to Right Window", remap = true })
+
+-- move lines
+map("n", "<A-j>", "<Cmd>execute 'move .+' . v:count1<CR>==", { desc = "Move Down" })
+map("n", "<A-k>", "<Cmd>execute 'move .-' . (v:count1 + 1)<CR>==", { desc = "Move Up" })
+map("i", "<A-k>", "<Esc><Cmd>m .-2<CR>==gi", { desc = "Move Up" })
+map("i", "<A-j>", "<Esc><Cmd>m .+1<CR>==gi", { desc = "Move Down" })
+map("v", "<A-j>", ":<C-u>execute \"'<,'>move '>+\" . v:count1<CR>gv=gv", { desc = "Move Down" })
+map("v", "<A-k>", ":<C-u>execute \"'<,'>move '<-\" . (v:count1 + 1)<cr>gv=gv", { desc = "Move Up" })
+
+-- buffers
+map("n", "<S-h>", "<Cmd>bprevious<CR>")
+map("n", "<S-l>", "<Cmd>bnext<CR>")
+map("n", "<Leader>bb", "<Cmd>e #<CR>")
+map("n", "<Leader>bd", "<Cmd>bdelete<CR>")
+
+-- plugin management
+map("n", "<Leader>pc", pack_clean, { desc = "Clean" })
+map("n", "<Leader>pu", pack_update, { desc = "Update" })
+
+-- clear search, diff update and redraw
+map("n", "<Leader>ur", "<Cmd>nohlsearch<Bar>diffupdate<Bar>normal! <C-L><CR>", { desc = "Clean All" })
+map("n", "<Leader>uh", "<Cmd>nohlsearch<CR>", { desc = "Clean Highlight" })
+
+-- save files
+map({ "i", "x", "n", "s" }, "<C-s>", "<Cmd>w<CR><Esc>")
+
+-- find files by telescope
+map("n", "<Leader>ff", telescope_builtin.find_files)
+map("n", "<Leader>fs", telescope_builtin.grep_string)
+map("n", "<Leader>fg", telescope_builtin.live_grep)
+
+-- quick press jk as <Esc>
+map("i", "jk", "<Esc>")
+
+-- write file
+map({ "n", "i" }, "<Leader>w", "<Esc><Cmd>write<CR>")
+
+-- open Explore
+map("n", "<Leader>e", "<Cmd>Explore<CR>")
