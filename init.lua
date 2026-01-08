@@ -207,7 +207,6 @@ local install_languages = {
   "c",
   "cpp",
   "json",
-  "jsonc",
   "lua",
   "markdown",
   "markdown_inline",
@@ -382,24 +381,24 @@ map({ "n", "x" }, "k", "v:count == 0 ? 'gk' : 'k'", { desc = "Up", expr = true, 
 map({ "n", "x" }, "<Up>", "v:count == 0 ? 'gk' : 'k'", { desc = "Up", expr = true, silent = true })
 
 -- move to window using the <Ctrl> hjkl keys
-map("n", "<C-h>", "<C-w>h", { desc = "Go to Left Window", remap = true })
-map("n", "<C-j>", "<C-w>j", { desc = "Go to Lower Window", remap = true })
-map("n", "<C-k>", "<C-w>k", { desc = "Go to Upper Window", remap = true })
-map("n", "<C-l>", "<C-w>l", { desc = "Go to Right Window", remap = true })
+map("n", "<C-h>", "<C-w>h", { desc = "Window Left", remap = true })
+map("n", "<C-j>", "<C-w>j", { desc = "Window Down", remap = true })
+map("n", "<C-k>", "<C-w>k", { desc = "Window Up", remap = true })
+map("n", "<C-l>", "<C-w>l", { desc = "Window Right", remap = true })
 
 -- move lines
-map("n", "<A-j>", "<Cmd>execute 'move .+' . v:count1<CR>==", { desc = "Move Down" })
-map("n", "<A-k>", "<Cmd>execute 'move .-' . (v:count1 + 1)<CR>==", { desc = "Move Up" })
-map("i", "<A-k>", "<Esc><Cmd>m .-2<CR>==gi", { desc = "Move Up" })
-map("i", "<A-j>", "<Esc><Cmd>m .+1<CR>==gi", { desc = "Move Down" })
-map("v", "<A-j>", ":<C-u>execute \"'<,'>move '>+\" . v:count1<CR>gv=gv", { desc = "Move Down" })
-map("v", "<A-k>", ":<C-u>execute \"'<,'>move '<-\" . (v:count1 + 1)<cr>gv=gv", { desc = "Move Up" })
+map("n", "<A-j>", "<Cmd>execute 'move .+' . v:count1<CR>==", { desc = "Line Move Down" })
+map("n", "<A-k>", "<Cmd>execute 'move .-' . (v:count1 + 1)<CR>==", { desc = "Line Move Up" })
+map("i", "<A-k>", "<Esc><Cmd>m .-2<CR>==gi", { desc = "Line Move Up" })
+map("i", "<A-j>", "<Esc><Cmd>m .+1<CR>==gi", { desc = "Line Move Down" })
+map("v", "<A-j>", ":<C-u>execute \"'<,'>move '>+\" . v:count1<CR>gv=gv", { desc = "Line Move Down" })
+map("v", "<A-k>", ":<C-u>execute \"'<,'>move '<-\" . (v:count1 + 1)<cr>gv=gv", { desc = "Line Move Up" })
 
 -- buffers
-map("n", "<S-h>", "<Cmd>bprevious<CR>")
-map("n", "<S-l>", "<Cmd>bnext<CR>")
-map("n", "<Leader>bb", "<Cmd>e #<CR>")
-map("n", "<Leader>bd", "<Cmd>bdelete<CR>")
+map("n", "<S-h>", "<Cmd>bprevious<CR>", { desc = "Previous Buffer" })
+map("n", "<S-l>", "<Cmd>bnext<CR>", { desc = "Next Buffer" })
+map("n", "<Leader>bb", "<Cmd>e #<CR>", { desc = "Alternate Buffer" })
+map("n", "<Leader>bd", "<Cmd>bdelete<CR>", { desc = "Delete Buffer" })
 
 -- delete all buffers except current
 local function delete_other_buffers()
@@ -414,15 +413,15 @@ end
 map("n", "<Leader>bo", delete_other_buffers, { desc = "Delete Other Buffers" })
 
 -- plugin management
-map("n", "<Leader>pc", pack_clean, { desc = "Clean" })
-map("n", "<Leader>pu", pack_update, { desc = "Update" })
+map("n", "<Leader>pc", pack_clean, { desc = "Plugins Clean" })
+map("n", "<Leader>pu", pack_update, { desc = "Plugins Update" })
 
 -- clear search, diff update and redraw
-map("n", "<Leader>ur", "<Cmd>nohlsearch<Bar>diffupdate<Bar>normal! <C-L><CR>", { desc = "Clean All" })
-map("n", "<Leader>uh", "<Cmd>nohlsearch<CR>", { desc = "Clean Highlight" })
+map("n", "<Leader>ur", "<Cmd>nohlsearch<Bar>diffupdate<Bar>normal! <C-L><CR>", { desc = "Clear Search & Diff" })
+map("n", "<Leader>uh", "<Cmd>nohlsearch<CR>", { desc = "Clear Search" })
 
 -- save files
-map({ "i", "x", "n", "s" }, "<C-s>", "<Cmd>w<CR><Esc>")
+map({ "i", "x", "n", "s" }, "<C-s>", "<Cmd>w<CR><Esc>", { desc = "Save File" })
 
 -- find files by telescope
 if telescope_builtin then
@@ -433,7 +432,7 @@ if telescope_builtin then
 end
 
 -- quick press jk as <Esc>
-map("i", "jk", "<Esc>")
+map("i", "jk", "<Esc>", { desc = "Escape" })
 
 -- write file
 map({ "n", "i" }, "<Leader>w", "<Esc><Cmd>write<CR>", { desc = "Write" })
