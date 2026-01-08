@@ -307,13 +307,13 @@ if conform then
       yaml = { "prettier" },
     },
     format_on_save = {
-      timeout_ms = 500,
+      timeout_ms = 3000,
       lsp_format = "fallback",
     },
   })
   vim.api.nvim_create_autocmd("BufWritePre", {
     group = augroup("format_on_save"),
-    pattern = { "*.sh", "*.bash", "*.c", "*.cpp", "*.cc", "*.h", "*.hpp", "*.lua", "*.py", "*.yml", "*.yaml" },
+    pattern = "*",
     callback = function(args)
       conform.format({ bufnr = args.buf })
     end,
