@@ -352,6 +352,7 @@ vim.api.nvim_create_autocmd("FileType", {
     "lspinfo",
     "nvim-pack",
     "qf",
+    "TelescopePrompt",
   },
   callback = function(event)
     vim.bo[event.buf].buflisted = false
@@ -426,8 +427,9 @@ map({ "i", "x", "n", "s" }, "<C-s>", "<Cmd>w<CR><Esc>")
 -- find files by telescope
 if telescope_builtin then
   map("n", "<Leader>ff", telescope_builtin.find_files, { desc = "Find Files" })
-  map("n", "<Leader>fs", telescope_builtin.grep_string, { desc = "Grep String" })
   map("n", "<Leader>fg", telescope_builtin.live_grep, { desc = "Live Grep" })
+  map("n", "<Leader>fk", telescope_builtin.keymaps, { desc = "Keymaps" })
+  map("n", "<Leader>fs", telescope_builtin.grep_string, { desc = "Grep String" })
 end
 
 -- quick press jk as <Esc>
