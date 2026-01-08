@@ -34,10 +34,10 @@ vim.o.ignorecase = true
 vim.o.smartcase = true
 
 -- update time
-vim.o.updatetime = 300
+vim.o.updatetime = 3000
 
 -- mapped sequence wait time
-vim.o.timeoutlen = 250
+vim.o.timeoutlen = 1500
 
 -- configure how new splits should be opened
 vim.o.splitright = true
@@ -303,6 +303,7 @@ if conform then
       cpp = { "clang-format" },
       json = { "prettier" },
       lua = { "stylua" },
+      markdown = { "prettier" },
       python = { "ruff_format" },
       yaml = { "prettier" },
     },
@@ -398,6 +399,18 @@ map("n", "<S-h>", "<Cmd>bprevious<CR>")
 map("n", "<S-l>", "<Cmd>bnext<CR>")
 map("n", "<Leader>bb", "<Cmd>e #<CR>")
 map("n", "<Leader>bd", "<Cmd>bdelete<CR>")
+
+-- delete all buffers except current
+local function delete_other_buffers()
+  local current_buf = vim.api.nvim_get_current_buf()
+  local buffers = vim.api.nvim_list_bufs()
+  for _, buf in ipairs(buffers) do
+    if buf ~= current_buf and vim.api.nvim_buf_is_loaded(buf) then
+      vim.api.nvim_buf_delete(buf, { force = true })
+    end
+  end
+end
+map("n", "<Leader>bo", delete_other_buffers, { desc = "Delete Other Buffers" })
 
 -- plugin management
 map("n", "<Leader>pc", pack_clean, { desc = "Clean" })
