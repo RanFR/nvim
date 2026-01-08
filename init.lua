@@ -161,7 +161,6 @@ vim.pack.add({
 
 -- set colorscheme
 vim.cmd.colorscheme("catppuccin-mocha")
--- vim.cmd.colorscheme("gruvbox")
 
 -- setup status line
 local lualine = safe_load("lualine")
@@ -193,6 +192,12 @@ if mini_starter then
     },
     silent = true,
   })
+end
+
+-- setup indentscope
+local mini_indentscope = safe_load("mini.indentscope")
+if mini_indentscope then
+  mini_indentscope.setup()
 end
 
 -- configure Mason to manage LSP/DAP/Formatter
