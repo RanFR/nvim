@@ -175,6 +175,26 @@ if mini_notify then
   mini_notify.setup()
 end
 
+-- setup starter
+local mini_starter = safe_load("mini.starter")
+if mini_starter then
+  mini_starter.setup({
+    evaluate_single = true,
+    items = {
+      { name = "Find Files", action = "Telescope find_files", section = "Telescope" },
+      { name = "Live Grep", action = "Telescope live_grep", section = "Telescope" },
+      { name = "Recent Files", action = "Telescope oldfiles", section = "Telescope" },
+      { name = "New File", action = "enew", section = "Basic" },
+      { name = "Quit", action = "qall", section = "Basic" },
+    },
+    content_hooks = {
+      mini_starter.gen_hook.adding_bullet("» ", false),
+      mini_starter.gen_hook.aligning("center", "center"),
+    },
+    silent = true,
+  })
+end
+
 -- configure Mason to manage LSP/DAP/Formatter
 local mason = safe_load("mason")
 if mason then
