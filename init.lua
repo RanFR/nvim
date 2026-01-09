@@ -448,6 +448,18 @@ local function delete_other_buffers()
 end
 map("n", "<Leader>bo", delete_other_buffers, { desc = "Delete Other Buffers" })
 
+-- delete all buffers and start new
+local function delete_all_buffers()
+  local buffers = vim.api.nvim_list_bufs()
+  for _, buf in ipairs(buffers) do
+    if vim.api.nvim_buf_is_loaded(buf) then
+      vim.api.nvim_buf_delete(buf, { force = true })
+    end
+  end
+  vim.cmd("enew")
+end
+map("n", "<Leader>ba", delete_all_buffers, { desc = "Delete All Buffers" })
+
 -- plugin management
 map("n", "<Leader>pc", pack_clean, { desc = "Plugins Clean" })
 map("n", "<Leader>pu", pack_update, { desc = "Plugins Update" })
