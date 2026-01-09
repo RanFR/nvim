@@ -260,6 +260,7 @@ local highlight_languages = {
   "markdown",
   "python",
   "sh",
+  "xml",
 }
 -- create auto highlight based on tree-sitter
 vim.api.nvim_create_autocmd("FileType", {
@@ -329,6 +330,7 @@ if conform then
       lua = { "stylua" },
       markdown = { "prettier" },
       python = { "ruff_format" },
+      xml = { "xmlformatter" },
       yaml = { "prettier" },
     },
     format_on_save = {
